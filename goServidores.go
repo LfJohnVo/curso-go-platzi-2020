@@ -9,6 +9,7 @@ import (
 func main()  {
 	//timer
 	inicio := time.Now()
+	canal := make(chan string)
 
 	//lista de servidores que la aplicación esta revisando
 	servidores := []string{
@@ -18,9 +19,21 @@ func main()  {
 		"http://instagram.com",
 	}
 
-	//recorrer slice
-	for _, servidor := range servidores{
-		revisarServidor(servidor)
+	i := 0
+
+	for  {
+		if i >2{
+			break
+		}
+		//recorrer slice
+		for _, servidor := range servidores{
+			go revisarServidor(servidor, canal)
+			//leer un canal
+			//fmt.Println(<-canal)
+		}
+		time.Sleep(1*time.Second)
+		fmt.Println(<-canal)
+		i++
 	}
 
 	//calcula el tiempo de ejecución
@@ -29,11 +42,11 @@ func main()  {
 
 }//termina main
 
-func revisarServidor(servidor string)  {
+func revisarServidor(servidor string, canal chan string)  {
 	_, err := http.Get(servidor)
 	if err != nil{
-		fmt.Println(servidor, "no esta disponible :(")
+		canal <- servidor + " No se encuentra disponible"
 	}else {
-		fmt.Println(servidor, "Operando normalmente :)")
+		canal <- servidor + " Esta funcionando"
 	}
 }
